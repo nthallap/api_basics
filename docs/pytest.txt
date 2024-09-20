@@ -1,0 +1,102 @@
+Pytest
+-------
+py test is a framework to create a test cases.
+
+install pytest
+---------------
+pip install pytest
+
+some of the rules to create a ctest cases
+----------------------
+tes suite name should start with test_<some_name>.py  for example test_myadd.py
+each test will a python function. function name should start with test_ , example def test_add()
+Class name also show start with Test
+
+how to execute pytest test cases
+-----------------------------
+pytest  <path of the suite or dir>
+
+ex : pytest -v test_mytest.py
+some options : --ff   failed first
+			   --lf	  last failed
+			   --tb=no  traceback no
+			   -k for selecting some of the test cases based on the expression
+			   -x stop execution after any tc fail
+			   --maxfail=3   stop execution some list of tc fail
+			   -v verbose
+			   -q quite execution
+			   --collect-only  to list number of tc going to execute, tc wont run
+			   -s to see console output
+			   --setup-show  to show to setup of execution
+
+run only specific testcs as below
+pytest  <test_file.py>::<test_fun_name>
+pytest  <test_file.py>::<class_name>::<test_fun_name>
+
+
+official url : https://docs.pytest.org/en/7.4.x/
+
+
+some decoratros to skip testcases
+------------------
+@pytest.mark.skip(reason="some reason")
+@pytest.mark.skipiif(<some_condition>, reason="some reason")
+to skip whole suite
+pytestmark = pytest.mark.skipif(sys.platform == "win32", reason="only running on linux")
+
+conftest.py is a file where you write all library methods kind of fixtures and hooks
+
+
+markers
+--------------
+    @pytest.mark.sanity
+    @pytest.mark.str
+    def test_upper(self):
+
+pytest -m <marker>  <path>  //here marker is a kind of tag
+pytest -m "sanity and not srt"
+pytest -m "not sanity"
+pytest -m "sanity and srt"
+pytest -m "sanity or srt"
+
+
+
+To mark test cases at module or class level
+pytestmark = [pytest.mark.sanity, pytest.mark.str]
+
+ @pytest.mark.xfail  --> this marker is using to specify test going to fail priorily 
+ 
+ 
+parameterization
+------------------
+to pass multiple values to the single test function
+@pytest.mark.parametrize("val", [10,15,16,35,1,65])
+def test_param1(val):
+
+fixtures
+----------
+fixtures are using for create setup and teardowns
+
+create fixtures
+@pytest.fixture()
+def myfixture():
+
+using fixture
+def test_fixture01(myfixture):
+
+
+request is a built in fixture
+request.scope
+request.function.__name__
+request.module.__name__
+getattr(request.module, "var_name")  #we can access the varible in fixture from suite file
+we can get these values from the fixture
+
+Scope
+---------
+• function: Runs once per test, the default value of the fixture scope. Fixture is destroyed at the end of the test. 
+• class: Runs once per class of tests
+• module: Runs once per module
+• session: Runs once per session
+• package: run once per package(directory)
+@fixture(fixture_function=None, *, scope='function', params=None, autouse=False, ids=None, name=None)
