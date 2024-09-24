@@ -11,6 +11,7 @@ print(res.headers)
 print(res.url)
 print(res.encoding)
 
+
 #prints data
 print(type(res.json()), res.json())
 print(type(res.text), res.text)

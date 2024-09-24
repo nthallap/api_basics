@@ -25,11 +25,12 @@ some options : --ff   failed first
 			   --maxfail=3   stop execution some list of tc fail
 			   -v verbose
 			   -q quite execution
-			   --collect-only  to list number of tc going to execute, tc wont run
+			   --collect-only  to list number of tc going to execute, tc won't run
 			   -s to see console output
-			   --setup-show  to show to setup of execution
+			   --setup-show  to show to set up of execution like which fixture execute before and after tc
+			   --debug to show the execution flow report
 
-run only specific testcs as below
+run only specific test case as below
 pytest  <test_file.py>::<test_fun_name>
 pytest  <test_file.py>::<class_name>::<test_fun_name>
 
@@ -37,12 +38,16 @@ pytest  <test_file.py>::<class_name>::<test_fun_name>
 official url : https://docs.pytest.org/en/7.4.x/
 
 
-some decoratros to skip testcases
+some decorators to skip testcases
 ------------------
 @pytest.mark.skip(reason="some reason")
 @pytest.mark.skipiif(<some_condition>, reason="some reason")
 to skip whole suite
 pytestmark = pytest.mark.skipif(sys.platform == "win32", reason="only running on linux")
+
+pytestmark is a variable to apply marker to the whole suite in single shot.
+ex pytestmark = [pytest.mark.sanity, pytest.mark.srt]
+To mark test cases at module or class level
 
 conftest.py is a file where you write all library methods kind of fixtures and hooks
 
@@ -59,12 +64,9 @@ pytest -m "not sanity"
 pytest -m "sanity and srt"
 pytest -m "sanity or srt"
 
-
-
-To mark test cases at module or class level
-pytestmark = [pytest.mark.sanity, pytest.mark.str]
-
- @pytest.mark.xfail  --> this marker is using to specify test going to fail priorily 
+ @pytest.mark.xfail  --> this marker is using to specify test going to fail priorly
+ @pytest.mark.xfail(raises=TypeError, reason="it will fail with type error")
+ @pytest.mark.xfail(sys.platform=="linux", reason="it should xfail only on linux failure in windows")
  
  
 parameterization
@@ -85,11 +87,11 @@ using fixture
 def test_fixture01(myfixture):
 
 
-request is a built in fixture
+request is a builtin fixture
 request.scope
 request.function.__name__
 request.module.__name__
-getattr(request.module, "var_name")  #we can access the varible in fixture from suite file
+getattr(request.module, "var_name")  #we can access the variable in fixture from suite file
 we can get these values from the fixture
 
 Scope
@@ -97,6 +99,39 @@ Scope
 • function: Runs once per test, the default value of the fixture scope. Fixture is destroyed at the end of the test. 
 • class: Runs once per class of tests
 • module: Runs once per module
-• session: Runs once per session
 • package: run once per package(directory)
-@fixture(fixture_function=None, *, scope='function', params=None, autouse=False, ids=None, name=None)
+• session: Runs once per session
+
+@pytest.fixture(fixture_function=None, *, scope='function', params=None, autouse=False, ids=None, name=None)
+
+this is how we used to do validate exceptions raising on our test cases
+def test_01():
+    with pytest.raises(EXCEPTION_NAME)
+        //test code
+
+this is another way to use fixture
+we can not use return value of fixture in this case.
+@pytest.mark.usefixtures("some_fixture")
+def test_using_fixture():
+    pass
+
+to skip a test case inside a test case based on a condition
+pytest.skip("Some condition not met")
+
+we can parameterize fixture as below
+each iteration it will return one parameter
+@pytest.fixture(params=[(1, 3), [2, 3]], ids=["tuple", 'list'])
+def param_fixture(request):
+    return request.param
+
+to create some command line arguments
+def pytest_addoption(parser):
+    parser.addoption("--test", default="some_value")
+
+read the options of config
+request.config.getoption("--test")
+
+
+pip install pytest-xdist
+this is a plugin to run test cases parallely
+pytest -n 4 this will run 4 test cases parallely
